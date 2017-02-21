@@ -32,15 +32,24 @@ ankle_angles_in.signals.values = smoothing(ankle_angles_in.signals.values,pp);
 ankle_angles_in.signals.values = curve_smooth(ankle_angles_in.signals.values);
 
 % Ankle Translation
-% -6.54cm from center of foot to center of ankle
-% -66.30203939mm is the vertical dist bw ankle and heel co-ord frame
-% 0.1517 is walkway height
-% pos defines the center of fp 
-% This is done so that center of fp becomes the origin(0,0) in ankle.trans
-% ankle2.trans = ankle.trans + quatrotate(quatinv(shin.quat), [0 -30e-2 0]);
-phase = linspace(0, 1, length(shin.quat))';
-% pos= mean(ankle.trans(rows,:)) + [-6.54e-2 -.1517-0.0859 0]
-pos= mean(ankle.trans((phase > 0.13 & phase < 0.45),:)) + [-6.54e-2 -0.1517-66.30203939e-3 0];
+% % -6.54cm from center of foot to center of ankle
+% % -66.30203939mm is the vertical dist bw ankle and heel co-ord frame
+% % 0.1517 is walkway height
+% % pos defines the center of fp 
+% % This is done so that center of fp becomes the origin(0,0) in ankle.trans
+% % ankle2.trans = ankle.trans + quatrotate(quatinv(shin.quat), [0 -30e-2 0]);
+% phase = linspace(0, 1, length(shin.quat))';
+% % pos= mean(ankle.trans(rows,:)) + [-6.54e-2 -.1517-0.0859 0]
+% pos= mean(ankle.trans((phase > 0.13 & phase < 0.45),:)) + [-6.54e-2*0 -0.1517-66.30203939e-3 0];
+
+% Finding heel strike
+dy = diff(ankle.trans(:,1));    dy = [dy;dy(end)];
+yy = bsxfun(@times,ankle.trans,(abs(dy)<5e-4));
+stancelen = round(0.1*length(yy):0.7*length(yy)); %(assuming stance happens within 10% and 70% of step)
+dymean = sum(yy(stancelen,:))./sum(yy(stancelen,:)~=0);
+idxstance = find(yy(stancelen,1)~=0);
+idxhlstrk = stancelen(1)+ idxstance(1);
+pos = dymean + [-6.54e-2*0 -0.1517-66.30203939e-3 0];
 
 ankle_trans_in.signals.values=bsxfun(@minus,ankle.trans,pos);
 ankle_trans_in.signals.values=repmat(ankle_trans_in.signals.values,step,1);
@@ -50,13 +59,22 @@ for ii=1:step-1
 ankle_trans_in.signals.values(ii*pp+1:(ii+1)*pp,1)=ankle_trans_in.signals.values(ii*pp,1)...
     +ankle_trans_in.signals.values(ii*pp+1:(ii+1)*pp,1);
 end
-% Offset to start prosthesis
-ankle_trans_in.signals.values(:,1)=bsxfun(@minus,ankle_trans_in.signals.values(:,1),ankle_trans_in.signals.values(pp,1));
-% ankle_trans_in.signals.values(:,2)=bsxfun(@plus,ankle_trans_in.signals.values(:,2),0.1517); % 0.1517 is walkway height
 
 % smoothing
 ankle_trans_in.signals.values = smoothing(ankle_trans_in.signals.values,pp);
 ankle_trans_in.signals.values = curve_smooth(ankle_trans_in.signals.values);
+
+% Adjustment for ground contact
+mean_gc = mean(ankle_trans_in.signals.values(idxhlstrk:idxhlstrk+0.25*pp,1));
+ankle_trans_in.signals.values(:,1)=ankle_trans_in.signals.values(:,1)-mean_gc;
+
+% % Y Distance
+% ydist = 0.1517+66.30203939e-3-min(abs(ankle_trans_in.signals.values(idxhlstrk:idxhlstrk+0.25*pp,2)));
+% ankle_trans_in.signals.values(:,2)=ankle_trans_in.signals.values(:,2)-ydist;
+
+% Offset to start prosthesis
+idx = find(abs(ankle_trans_in.signals.values(:,1))==min(abs(ankle_trans_in.signals.values(idxhlstrk:idxhlstrk+0.25*pp,1))));
+ankle_trans_in.signals.values(:,1)=bsxfun(@minus,ankle_trans_in.signals.values(:,1),ankle_trans_in.signals.values(idx+pp,1));
     
 % Shin angles
 % [r1,r2,r3]=quat2angle(shin.quat,'YZX'); % ML/DP/IE
