@@ -97,8 +97,13 @@ ankle_trans_in.signals.values(:,1)=bsxfun(@minus,ankle_trans_in.signals.values(:
 % % r1 = abs(r1);
 shin_angles = shin.angles;
 shin_angles(:,2) = abs(shin.angles(:,2));
+<<<<<<< HEAD
 for ii=1:size(shin.angles,2)
     if mean(shin.angles(:,ii))>2
+=======
+for ii=1:size(shin.angle,2)
+    if mean(shin.angle(:,ii))>2
+>>>>>>> ce32a82b5ad6890c4eba51674bd87672a9541405
         shin_angles(:,ii) = shin_angles(:,ii)-pi;
     end
 end

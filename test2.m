@@ -14,7 +14,11 @@ footq.trans = ftrans;
 %% Data for Simlulation
 
 % No. of steps
+<<<<<<< HEAD
 step = 1;
+=======
+step = 3;
+>>>>>>> ce32a82b5ad6890c4eba51674bd87672a9541405
 pp=length(ankle.trans);
 
 % Ankle Angles IE/ML/DP
@@ -74,10 +78,15 @@ ankle_trans_in.signals.values(:,1)=ankle_trans_in.signals.values(:,1)-mean_gc;
 
 % Offset to start prosthesis
 idx = find(abs(ankle_trans_in.signals.values(:,1))==min(abs(ankle_trans_in.signals.values(idxhlstrk:idxhlstrk+0.25*pp,1))));
+<<<<<<< HEAD
 if step~=1
     ankle_trans_in.signals.values(:,1)=bsxfun(@minus,ankle_trans_in.signals.values(:,1),ankle_trans_in.signals.values(idx+pp,1));
 end
 
+=======
+ankle_trans_in.signals.values(:,1)=bsxfun(@minus,ankle_trans_in.signals.values(:,1),ankle_trans_in.signals.values(idx+pp,1));
+    
+>>>>>>> ce32a82b5ad6890c4eba51674bd87672a9541405
 % Shin angles
 % [r1,r2,r3]=quat2angle(shin.quat,'YZX'); % ML/DP/IE
 % r123=[r3,abs(r1),r2];
@@ -127,6 +136,7 @@ sim('Sim_test.slx');
 toc
 
 %% Results
+<<<<<<< HEAD
 results.ankle = struct('ang_dp', angle_dp_out.signals.values,'ang_ie', angle_ie_out.signals.values,...
            'vel_dp',vel_dp.signals.values,'vel_ie',vel_ie.signals.values,... 
            'acc_dp',acc_dp.signals.values,'acc_ie',acc_ie.signals.values);
@@ -142,3 +152,20 @@ fpForce = quatrotate(quatinv(results.fplate.quat), results.fplate.forces);
 fpTorque = quatrotate(quatinv(results.fplate.quat), results.fplate.torques);
 
 torque = cross(results.fplate.trans - ankle_ej.trans, fpForce) + fpTorque;
+=======
+ankle = struct('ang_dp', angle_dp_out.signals.values,'ang_ie', angle_ie_out.signals.values,...
+           'vel_dp',vel_dp.signals.values,'vel_ie',vel_ie.signals.values,... 
+           'acc_dp',acc_dp.signals.values,'acc_ie',acc_ie.signals.values);
+shin = struct('trans', trans_shin.signals.values, 'quat', quat_shin.signals.values);
+foot = struct('trans', trans_foot.signals.values, 'quat', quat_foot.signals.values,...
+    'acc',acc_foot.signals.values);
+fplate = struct('trans', trans_fp.signals.values, 'quat', quat_fp.signals.values,...
+    'torques', fp_torque_out.signals.values, 'forces', fp_force_out.signals.values);
+
+[~, ~, ankle_ej.trans, ~] = est_joint(shin, foot);
+
+fpForce = quatrotate(quatinv(fplate.quat), fplate.forces);
+fpTorque = quatrotate(quatinv(fplate.quat), fplate.torques);
+
+torque = cross(fplate.trans - ankle_ej.trans, fpForce) + fpTorque;
+>>>>>>> ce32a82b5ad6890c4eba51674bd87672a9541405
