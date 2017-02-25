@@ -14,11 +14,7 @@ footq.trans = ftrans;
 %% Data for Simlulation
 
 % No. of steps
-<<<<<<< HEAD
 step = 1;
-=======
-step = 3;
->>>>>>> ce32a82b5ad6890c4eba51674bd87672a9541405
 pp=length(ankle.trans);
 
 % Ankle Angles IE/ML/DP
@@ -78,15 +74,10 @@ ankle_trans_in.signals.values(:,1)=ankle_trans_in.signals.values(:,1)-mean_gc;
 
 % Offset to start prosthesis
 idx = find(abs(ankle_trans_in.signals.values(:,1))==min(abs(ankle_trans_in.signals.values(idxhlstrk:idxhlstrk+0.25*pp,1))));
-<<<<<<< HEAD
 if step~=1
     ankle_trans_in.signals.values(:,1)=bsxfun(@minus,ankle_trans_in.signals.values(:,1),ankle_trans_in.signals.values(idx+pp,1));
 end
 
-=======
-ankle_trans_in.signals.values(:,1)=bsxfun(@minus,ankle_trans_in.signals.values(:,1),ankle_trans_in.signals.values(idx+pp,1));
-    
->>>>>>> ce32a82b5ad6890c4eba51674bd87672a9541405
 % Shin angles
 % [r1,r2,r3]=quat2angle(shin.quat,'YZX'); % ML/DP/IE
 % r123=[r3,abs(r1),r2];
