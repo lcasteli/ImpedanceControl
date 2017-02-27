@@ -14,7 +14,7 @@ footq.trans = ftrans;
 %% Data for Simlulation
 
 % No. of steps
-step = 1;
+step = 3;
 pp=length(ankle.trans);
 
 % Ankle Angles IE/ML/DP
@@ -108,11 +108,11 @@ shin_angles_in.signals.values = curve_smooth(shin_angles_in.signals.values);
 % t = linspace(0,10,length(shin_angles_in.signals.values))';
 fs = 350;
 N = length(shin_angles_in.signals.values);
-t = (0:1/fs:(N-1)/fs).';
+ti = (0:1/fs:(N-1)/fs).';
 
-ankle_angles_in.time = t;
-ankle_trans_in.time=t;
-shin_angles_in.time= t;
+ankle_angles_in.time = ti;
+ankle_trans_in.time=ti;
+shin_angles_in.time= ti;
 
 toc
 %% Gait Cycle
@@ -122,11 +122,12 @@ damp_dp=1; damp_ie=1;
 sta=[-0.5345 0.03779 -0.0866]; %offset of prosthesis from centre of FP (XZY)
 
 % Solver as ode15s, ode23s, ode23t, ode23tb
-set_param('Sim_test', 'StopTime', 't(end)')
+set_param('Sim_test', 'StopTime', 'ti(end)')
 sim('Sim_test.slx');
 toc
 
 %% Results
+tf = angle_dp_out.time;
 results.ankle = struct('ang_dp', angle_dp_out.signals.values,'ang_ie', angle_ie_out.signals.values,...
            'vel_dp',vel_dp.signals.values,'vel_ie',vel_ie.signals.values,... 
            'acc_dp',acc_dp.signals.values,'acc_ie',acc_ie.signals.values);
@@ -142,3 +143,4 @@ fpForce = quatrotate(quatinv(results.fplate.quat), results.fplate.forces);
 fpTorque = quatrotate(quatinv(results.fplate.quat), results.fplate.torques);
 
 torque = cross(results.fplate.trans - ankle_ej.trans, fpForce) + fpTorque;
+figure; plot(tf,torque)
