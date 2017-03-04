@@ -4,15 +4,16 @@
 %ankle_angles = IE/ML/DP
 %inertial frame = x points backwards, y points upwards
 
-tic
-load('dataset_sim.mat')
-shinq.trans = strans;
-shinq.quat = squat;
-footq.quat = fquat;
-footq.trans = ftrans;
-[shin, ~, ankle] = processdata(shinq,footq);
-%% Data for Simlulation
+% load('dataset_sim.mat')
+% shinq.trans = strans;
+% shinq.quat = squat;
+% footq.quat = fquat;
+% footq.trans = ftrans;
+% [shin, ~, ankle] = processdata(shinq,footq);
 
+%% Data for Simlulation
+% clearvars -except ankle shin torques
+tic
 % No. of steps
 step = 3;
 pp=length(ankle.trans);
@@ -102,19 +103,37 @@ end
 shin_angles_in.signals.values = smoothing(shin_angles_in.signals.values,pp);
 shin_angles_in.signals.values = curve_smooth(shin_angles_in.signals.values);
 
+% Ankle Velocity
+ankle_vel_in.signals.values = diff(ankle_trans_in.signals.values);
+ankle_vel_in.signals.values = [ankle_vel_in.signals.values; ankle_vel_in.signals.values(end,:)];
+ankle_vel_in.signals.values = curve_smooth(ankle_vel_in.signals.values);
+
+% Shin Velocity
+shin_vel_in.signals.values = diff(shin_angles_in.signals.values);
+shin_vel_in.signals.values = [shin_vel_in.signals.values; shin_vel_in.signals.values(end,:)];
+shin_vel_in.signals.values = curve_smooth(shin_vel_in.signals.values);
+
+% % Excahnging cloumns for XZY orientation
+% ankle_trans_in.signals.values(:,[1 2 3]) = ankle_trans_in.signals.values(:,[2 1 3]);
+% ankle_vel_in.signals.values(:,[1 2 3]) = ankle_vel_in.signals.values(:,[2 1 3]);
+% shin_angles_in.signals.values(:,[1 2 3]) = shin_angles_in.signals.values(:,[2 1 3]);
+% shin_vel_in.signals.values(:,[1 2 3]) = shin_vel_in.signals.values(:,[2 1 3]);
+
 % % Force Plate Input
 % fp_dp_in.signals.values = ;
 % fp_ie_in.signals.values = ;
 
 % time
-% t = linspace(0,10,length(shin_angles_in.signals.values))';
+% ti = linspace(0,10,length(shin_angles_in.signals.values))';
 fs = 350;
 N = length(shin_angles_in.signals.values);
 ti = (0:1/fs:(N-1)/fs).';
 
 ankle_angles_in.time = ti;
-ankle_trans_in.time=ti;
-shin_angles_in.time= ti;
+ankle_trans_in.time = ti;
+shin_angles_in.time = ti;
+shin_vel_in.time = ti;
+ankle_vel_in.time = ti;
 
 toc
 %% Gait Cycle
@@ -126,6 +145,8 @@ sta=[-0.5345 0.03779 -0.0866]; %offset of prosthesis from centre of FP (XZY)
 % Solver as ode15s, ode23s, ode23t, ode23tb
 set_param('Sim_test_2016a', 'StopTime', 'ti(end)')
 sim('Sim_test_2016a.slx');
+% set_param('sim_impcont', 'StopTime', 'ti(end)')
+% sim('sim_impcont.slx');
 toc
 
 %% Results
@@ -156,50 +177,50 @@ figure; plot(tf,torque)
 figure; plot(tf(end/3:2*end/3),tt_dp.signals.values(end/3:2*end/3,:))
 figure; plot(trimmean(torques,10,3))
 
-%% Analysis
-
-dpangle = results.ankle.ang_dp(end/3:2*end/3);
-ieangle = results.ankle.ang_ie(end/3:2*end/3);
-dpvel = results.ankle.vel_dp(end/3:2*end/3);
-ievel = results.ankle.vel_ie(end/3:2*end/3);
-dpfootacc = results.foot.acc(end/3:2*end/3,3);
-iefootacc = results.foot.acc(end/3:2*end/3,1);
-dptorque = tt_dp.signals.values(end/3:2*end/3,3);
-ietorque = tt_ie.signals.values(end/3:2*end/3,1);
-% regMdl_dp = regress(dptorque,[dpangle dpvel dpfootacc]);
-% regMdl_ie = regress(ietorque,[ieangle ievel iefootacc]);
-% analysis_si = struct('kdp',regMdl_dp(1),'bdp',regMdl_dp(2),...
-%     'kie',regMdl_ie(1),'bie',regMdl_ie(2),'Jdp',regMdl_dp(3),...
-%     'Jie',regMdl_ie(3));
-% Define model  ===========================================================
-
-Hharm = @(ang, order) [sin(bsxfun(@times, ang, order)) cos(bsxfun(@times, ang, order))];
-Hpoly = @(ang, order) [bsxfun(@power, mod(ang, 2*pi), order) bsxfun(@power, mod(ang+pi, 2*pi), order)];
-
-% function basis for k, m and b
-%  T_ = f_(kinect, phase)*params
-fk = @(kinect, phase) bsxfun(@times, [Hharm(phase, 1:5) ones(size(phase))], kinect);
-fb = @(kinect, phase) bsxfun(@times, [Hharm(phase, 1:5) ones(size(phase))], kinect);
-fm = @(kinect, phase) bsxfun(@times, [Hharm(phase, 1:5) ones(size(phase))], kinect);
-
-% system model, T = f(kinect, ang)*params
-f = @(kinect, ang) [fk(kinect(:,1),ang) fb(kinect(:,2),ang) fm(kinect(:,3),ang)];
-            
-% Solve LS for DP================================================================
-Q_dp = [dpangle, dpvel, dpfootacc];
-R_dp = linspace(0,2*pi,length(Q_dp))';
-T_dp = dptorque;
-
-lm_dp = fitlm(f(Q_dp, R_dp), T_dp)
-params_dp = lm_dp.Coefficients.Estimate(2:end);
-
-% Solve LS for IE================================================================
-Q_ie = [ieangle, ievel, iefootacc];
-R_ie = linspace(0,2*pi,length(Q_ie))';
-T_ie = ietorque;
-
-lm_ie = fitlm(f(Q_ie, R_ie), T_ie)
-params_ie = lm_ie.Coefficients.Estimate(2:end);
-
-figure; plot(params_dp)
-figure; plot(params_ie)
+% %% Analysis
+% 
+% dpangle = results.ankle.ang_dp(end/3:2*end/3);
+% ieangle = results.ankle.ang_ie(end/3:2*end/3);
+% dpvel = results.ankle.vel_dp(end/3:2*end/3);
+% ievel = results.ankle.vel_ie(end/3:2*end/3);
+% dpfootacc = results.foot.acc(end/3:2*end/3,3);
+% iefootacc = results.foot.acc(end/3:2*end/3,1);
+% dptorque = tt_dp.signals.values(end/3:2*end/3,3);
+% ietorque = tt_ie.signals.values(end/3:2*end/3,1);
+% % regMdl_dp = regress(dptorque,[dpangle dpvel dpfootacc]);
+% % regMdl_ie = regress(ietorque,[ieangle ievel iefootacc]);
+% % analysis_si = struct('kdp',regMdl_dp(1),'bdp',regMdl_dp(2),...
+% %     'kie',regMdl_ie(1),'bie',regMdl_ie(2),'Jdp',regMdl_dp(3),...
+% %     'Jie',regMdl_ie(3));
+% % Define model  ===========================================================
+% 
+% Hharm = @(ang, order) [sin(bsxfun(@times, ang, order)) cos(bsxfun(@times, ang, order))];
+% Hpoly = @(ang, order) [bsxfun(@power, mod(ang, 2*pi), order) bsxfun(@power, mod(ang+pi, 2*pi), order)];
+% 
+% % function basis for k, m and b
+% %  T_ = f_(kinect, phase)*params
+% fk = @(kinect, phase) bsxfun(@times, [Hharm(phase, 1:5) ones(size(phase))], kinect);
+% fb = @(kinect, phase) bsxfun(@times, [Hharm(phase, 1:5) ones(size(phase))], kinect);
+% fm = @(kinect, phase) bsxfun(@times, [Hharm(phase, 1:5) ones(size(phase))], kinect);
+% 
+% % system model, T = f(kinect, ang)*params
+% f = @(kinect, ang) [fk(kinect(:,1),ang) fb(kinect(:,2),ang) fm(kinect(:,3),ang)];
+%             
+% % Solve LS for DP================================================================
+% Q_dp = [dpangle, dpvel, dpfootacc];
+% R_dp = linspace(0,2*pi,length(Q_dp))';
+% T_dp = dptorque;
+% 
+% lm_dp = fitlm(f(Q_dp, R_dp), T_dp)
+% params_dp = lm_dp.Coefficients.Estimate(2:end);
+% 
+% % Solve LS for IE================================================================
+% Q_ie = [ieangle, ievel, iefootacc];
+% R_ie = linspace(0,2*pi,length(Q_ie))';
+% T_ie = ietorque;
+% 
+% lm_ie = fitlm(f(Q_ie, R_ie), T_ie)
+% params_ie = lm_ie.Coefficients.Estimate(2:end);
+% 
+% figure; plot(params_dp)
+% figure; plot(params_ie)

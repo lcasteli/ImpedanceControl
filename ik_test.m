@@ -16,15 +16,16 @@ function [qp, dev] = ik_test(t, q)
     
     for k = 1 : ITER
         
-        s = FK_test(q);          % current pose, as transf matrix
+        s = FK_gaitEmul(q);          % current pose, as transf matrix
         
         e = t - s;          % pose error, cartesian space
         
-        if norm(e) < TOL    % solution is close enough
+        if double(norm(e)) < TOL    % solution is close enough
             break
         end
 
-        J = jacobian1(q);    % jacobian, d pose / d joint
+%         J = jacobian1(q);    % jacobian, d pose / d joint
+        J = jacob_gaitEmul(q);
         
         dq = J\e;
         if norm(dq) > 3
@@ -38,7 +39,8 @@ function [qp, dev] = ik_test(t, q)
     end
 %     fprintf('Solution completed: %d steps required', k)
     qp = q;
-    dev = t - FK_test(q); % deviation from solution
+%     dev = t - FK_test(q); % deviation from solution
+    dev = t - FK_gaitEmul(q); % deviation from solution
 end
 
 % function s = fk_pend(q)
@@ -79,6 +81,7 @@ function s = FK_test(q)
 %   Transformation matrix for the end-effector
 
 %     q = sym('q', [6 1], 'real')
+%     Rz = @(q) [cos(q) -sin(q) 0; sin(q) cos(q) 0; 0 0 1];
 %   q=[x z y theta_dp theta_ie theta_ml];
     T01 = [0 0 1 -3.2; 1 0 0  1.455; 0 1 0 0.555; 0 0 0 1] * [eye(3) [0 0 q(1)]'; 0 0 0 1];
     T12 = [-1 0 0 -0.53; 0 0 1 -1.035; 0 1 0 2.479; 0 0 0 1] * [eye(3) [0 0 q(2)]'; 0 0 0 1];

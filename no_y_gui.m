@@ -3,16 +3,17 @@
 %load ankle_angles.mat, shin_quat.mat, shin_trans.mat
 %ankle_angles = IE/ML/DP
 %inertial frame = x points backwards, y points upwards
+% 
+% load('dataset_sim.mat')
+% shinq.trans = strans;
+% shinq.quat = squat;
+% footq.quat = fquat;
+% footq.trans = ftrans;
+% [shin, ~, ankle] = processdata(shinq,footq);
 
-tic
-load('dataset_sim.mat')
-shinq.trans = strans;
-shinq.quat = squat;
-footq.quat = fquat;
-footq.trans = ftrans;
-[shin, ~, ankle] = processdata(shinq,footq);
 %% Data for Simlulation
-
+% clearvars -except ankle shin torques
+tic
 % No. of steps
 step = 3;
 pp=length(ankle.trans);
@@ -124,8 +125,8 @@ damp_dp=1; damp_ie=1;
 sta=[-0.5345 0.03779 -0.0866]; %offset of prosthesis from centre of FP (XZY)
 
 % Solver as ode15s, ode23s, ode23t, ode23tb
-set_param('Sim_test_2016a', 'StopTime', 'ti(end)')
-sim('Sim_test_2016a.slx');
+set_param('GaitEmu', 'StopTime', 'ti(end)')
+sim('GaitEmu.slx');
 toc
 
 %% Results
