@@ -1,4 +1,4 @@
-function [shin, foot, ankle] = processdata(shinq,footq)
+function [shin, foot, ankle] = processdata(shinq,footq,ankleq)
 
     N = size(shinq.trans,1);
     reps = size(shinq.trans,3);
@@ -45,5 +45,8 @@ function [shin, foot, ankle] = processdata(shinq,footq)
     % Ankle Trans
     rowsat = ankle_trans(end,1,:)<0;
     ankle.trans = trimmean(ankle_trans(:,:,rowsat), 10, 3);
-
+    
+    % Ankle Forces and Torques
+    ankle.force = trimmean(ankleq.force(:,:,rowsat), 10, 3);
+    ankle.torque = trimmean(ankleq.torque(:,:,rowsat), 10, 3);
 end
