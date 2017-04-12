@@ -9,13 +9,16 @@
 % shinq.quat = squat;
 % footq.quat = fquat;
 % footq.trans = ftrans;
-% [shin, ~, ankle] = processdata(shinq,footq);
+% ankleq.force = forces;
+% ankleq.torque = torques;
+% [shin, ~, ankle] = processdata(shinq,footq,ankleq);
 
 %% Data for Simlulation
-clearvars -except ankle shin torques
+% clearvars -except ankle shin torques
+load gaittest
 tic
 % No. of steps
-step = 3;
+step = 1;
 pp=length(ankle.trans);
 
 % Ankle Angles IE/ML/DP
@@ -138,13 +141,15 @@ ankle_vel_in.time = ti;
 toc
 %% Gait Cycle
 stiff_x=1e4;
-stiff_dp=0.001; stiff_ie=0.001;
+stiff_dp=0.1; stiff_ie=0.1;
 damp_dp=1; damp_ie=1;
 sta=[-0.5345 0.03779 -0.0866]; %offset of prosthesis from centre of FP (XZY)
 
 % Solver as ode15s, ode23s, ode23t, ode23tb
 set_param('Sim_test_2016a', 'StopTime', 'ti(end)')
 sim('Sim_test_2016a.slx');
+% set_param('Sim_si', 'StopTime', '10')
+% sim('Sim_si.slx');
 % set_param('sim_impcont', 'StopTime', 'ti(end)')
 % % set_param('sim_impcont','AlgebraicLoopSolver','LineSearch')
 % sim('sim_impcont.slx');
@@ -176,7 +181,7 @@ torque = cross(results.fplate.trans - ankle_ej.trans, fpForce) + fpTorque;
 
 figure; plot(tf,torque)
 figure; plot(tf(end/3:2*end/3),tt_dp.signals.values(end/3:2*end/3,:))
-figure; plot(trimmean(torques,10,3))
+figure; plot(ankle.torque)
 
 % %% Analysis
 % 
