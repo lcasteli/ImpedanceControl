@@ -117,8 +117,10 @@ damp_dp=1; damp_ie=1;
 sta=[-0.5345 0.03779 -0.0866]; %offset of prosthesis from centre of FP (XZY)
 
 % Solver as ode15s, ode23s, ode23t, ode23tb
-set_param('Sim_no_y', 'StopTime', 't(end)')
-sim('Sim_no_y.slx');
+% set_param('Sim_no_y', 'StopTime', 't(end)')
+% sim('Sim_no_y.slx');
+set_param('GaitEmu', 'StopTime', 't(end)')
+sim('GaitEmu.slx');
 
 ankle = struct('ang_dp', angle_dp_out.signals.values,'ang_ie', angle_ie_out.signals.values,...
            'vel_dp',vel_dp.signals.values,'vel_ie',vel_ie.signals.values,... 

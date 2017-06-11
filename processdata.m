@@ -24,7 +24,7 @@ function [shin, foot, ankle] = processdata(shinq,footq,ankleq)
         r123f(:,:,k) = [r3f, r1f, r2f];
     end
     rowsfq = abs(r123f(1,2,:)) < 1; % Identify direction
-    foot.angles = trimmean(r123s(:,:,rowsfq), 10, 3);
+    foot.angles = trimmean(r123f(:,:,rowsfq), 10, 3);
     foot.quat = angle2quat(foot.angles(:,1),foot.angles(:,2),foot.angles(:,3),'YZX');
     % Foot Trans
     rowsft = footq.trans(end,1,:)<0;
@@ -46,7 +46,9 @@ function [shin, foot, ankle] = processdata(shinq,footq,ankleq)
     rowsat = ankle_trans(end,1,:)<0;
     ankle.trans = trimmean(ankle_trans(:,:,rowsat), 10, 3);
     
+    if ankleq ~= []
     % Ankle Forces and Torques
     ankle.force = trimmean(ankleq.force(:,:,rowsat), 10, 3);
     ankle.torque = trimmean(ankleq.torque(:,:,rowsat), 10, 3);
+    end
 end
