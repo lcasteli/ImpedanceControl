@@ -10,10 +10,14 @@
 % footq.quat = fquat;
 % footq.trans = ftrans;
 % [shin, foot, ankle] = processdata(shinq,footq,[]);
+%%
+load('dataset_sim.mat')
+fp.torque = torquesfp(:,:,1);
+clearvars -except fp
 
 %% Data for Simlulation
 % clearvars -except ankle shin torques
-load shinfoot_data.mat
+load shinfoot_data2.mat
 tic
 % No. of steps
 nstep = 3;
@@ -79,7 +83,6 @@ idx = find(abs(ankle_trans_in.signals.values(:,1))==min(abs(ankle_trans_in.signa
 if nstep~=1
     ankle_trans_in.signals.values(:,1)=bsxfun(@minus,ankle_trans_in.signals.values(:,1),ankle_trans_in.signals.values(idx+pp,1));
 end
-% ankle_trans_in.signals.values(:,2)=ankle_trans_in.signals.values(:,2)+0.1;
 
 % Shin angles
 % [r1,r2,r3]=quat2angle(shin.quat,'YZX'); % ML/DP/IE
@@ -201,13 +204,21 @@ Xdd.time = ankle_acc_in.time;
 % initpos = inv(jacob_shinfoot(zeros(8,1)))*X.signals.values(1,:).';
 % initpos = zeros(3,1);
 
+% fp_in.signals.values = repmat(fp.torque,step,1); %DP/IE/ML
+% fp_in.signals.values = fp_in.signals.values(:,[2 3]);
+% fp_in.time = ti;
+
+% ankle_trans_in.signals.values(:,2)=ankle_trans_in.signals.values(:,2)+0.1;
+
 toc
 %% Gait Cycle
 % stiff_x=1e4;
-stiff_dp=0.75*180/pi; stiff_ie=0.75*180/pi;
-damp_dp=0.5*180/pi; damp_ie=0.5*180/pi;
-% stiff_dp=0*180/pi; stiff_ie=0*180/pi;
-% damp_dp=0*180/pi; damp_ie=0*180/pi;
+% stiff_dp=0.75*180/pi; stiff_ie=0.75*180/pi;
+% damp_dp=0.5*180/pi; damp_ie=0.5*180/pi;
+% stiff_dp=319; stiff_ie=119;
+% damp_dp=1; damp_ie=1;
+stiff_dp=122.21; stiff_ie=67.2766;
+damp_dp=1.4207; damp_ie=0.5552;
 sta=[-0.5345 0.03779 -0.0866]; %offset of prosthesis from centre of FP (XZY)
 
 % Solver as ode15s, ode23s, ode23t, ode23tb
@@ -215,9 +226,9 @@ sta=[-0.5345 0.03779 -0.0866]; %offset of prosthesis from centre of FP (XZY)
 % % set_param('Impcont_foot','AlgebraicLoopSolver','LineSearch')
 % sim('Impcont_foot.slx');
 
-set_param('Impcont_foot_test', 'StopTime', 'ti(end)')
-set_param('Impcont_foot_test','AlgebraicLoopSolver','LineSearch')
-sim('Impcont_foot_test.slx');
+set_param('Impcont_foot_test2', 'StopTime', 'ti(end)')
+set_param('Impcont_foot_test2','AlgebraicLoopSolver','LineSearch')
+sim('Impcont_foot_test2.slx');
 
 % set_param('Impcont_af', 'StopTime', 'ti(end)')
 % set_param('Impcont_af','AlgebraicLoopSolver','LineSearch')

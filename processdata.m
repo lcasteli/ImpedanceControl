@@ -46,9 +46,19 @@ function [shin, foot, ankle] = processdata(shinq,footq,ankleq)
     rowsat = ankle_trans(end,1,:)<0;
     ankle.trans = trimmean(ankle_trans(:,:,rowsat), 10, 3);
     
-    if ankleq ~= []
     % Ankle Forces and Torques
+    if isfield(ankleq, 'force')
     ankle.force = trimmean(ankleq.force(:,:,rowsat), 10, 3);
+    end
+    if isfield(ankleq, 'torque')
     ankle.torque = trimmean(ankleq.torque(:,:,rowsat), 10, 3);
     end
+    
+%     % Force Plate Forces and Torques
+%     if isfield(fpq, 'force')
+%         fp.force = trimmean(fpq.force(:,:,rowsat), 10, 3);
+%     end
+%     if isfield(fpq, 'torque')
+%         fp.torque = trimmean(fpq.torque(:,:,rowsat), 10, 3);
+%     end
 end

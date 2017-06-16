@@ -21,6 +21,9 @@ idxhlstrk = stancelen(1)+ idxstance(1);
 pos = dymean + [-6.54e-2*0 -0.1517 0];
 
 footq_trans_in.signals.values=bsxfun(@minus,footq.trans,pos);
+
+% footq_trans_in.signals.values(:,2) = bsxfun(@plus,footq_trans_in.signals.values(:,2),0.1517-min(footq_trans_in.signals.values(:,2)));
+
 footq_trans_in.signals.values=repmat(footq_trans_in.signals.values,nstep,1);
 
 % Appending data for nsteps
