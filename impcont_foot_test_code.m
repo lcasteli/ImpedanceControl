@@ -17,7 +17,7 @@ clearvars -except fp
 
 %% Data for Simlulation
 % clearvars -except ankle shin torques
-load shinfoot_data2.mat
+load shinfoot_data.mat
 tic
 % No. of steps
 nstep = 3;
