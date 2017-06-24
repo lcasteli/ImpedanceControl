@@ -28,10 +28,8 @@ pp=length(ankle.trans);
 ankle_angle_data = repmat(ankle.angles,step,1);
 ankle_angles_in.signals.values = ankle_angle_data(:,[1 3]);
 
-for ii=1:size(ankle_angles_in.signals.values,2)
-    if(mean(ankle_angles_in.signals.values(:,ii))<0)
-        ankle_angles_in.signals.values(:,ii)=-ankle_angles_in.signals.values(:,ii);
-    end
+if(mean(ankle_angles_in.signals.values(:,2))<0)
+    ankle_angles_in.signals.values(:,2)=-ankle_angles_in.signals.values(:,2);
 end
 % smoothing
 ankle_angles_in.signals.values = smoothing(ankle_angles_in.signals.values,pp);
@@ -62,8 +60,10 @@ ankle_trans_in.signals.values=repmat(ankle_trans_in.signals.values,step,1);
 
 % Appending data for steps
 for ii=1:step-1
-ankle_trans_in.signals.values(ii*pp+1:(ii+1)*pp,1)=ankle_trans_in.signals.values(ii*pp,1)...
-    +ankle_trans_in.signals.values(ii*pp+1:(ii+1)*pp,1);
+% ankle_trans_in.signals.values(ii*pp+1:(ii+1)*pp,1)=ankle_trans_in.signals.values(ii*pp,1)...
+%     +ankle_trans_in.signals.values(ii*pp+1:(ii+1)*pp,1);
+ankle_trans_in.signals.values(ii*pp+1:(ii+1)*pp,1)= ankle_trans_in.signals.values(ii*pp+1:(ii+1)*pp,1)...
+    -(ankle_trans_in.signals.values(ii*pp+1,1)-ankle_trans_in.signals.values(ii*pp,1));
 end
 
 % smoothing
@@ -85,18 +85,19 @@ end
 % r123=[r3,abs(r1),r2];
 % % r1 = abs(r1);
 shin_angles = shin.angles;
-shin_angles(:,2) = abs(shin.angles(:,2));
+% shin_angles(:,2) = abs(shin.angles(:,2));
 for ii=1:size(shin.angles,2)
     if mean(shin.angles(:,ii))>2
         shin_angles(:,ii) = shin_angles(:,ii)-pi;
     end
 end
 shin_angles_in.signals.values = repmat(shin_angles,step,1); %DP/IE/ML
-for ii=1:size(shin_angles_in.signals.values,2)
-    if(mean(shin_angles_in.signals.values(:,ii))<0)
-        shin_angles_in.signals.values(:,ii)=-shin_angles_in.signals.values(:,ii);
-    end
-end
+% for ii=1:size(shin_angles_in.signals.values,2)
+%     if(mean(shin_angles_in.signals.values(:,ii))<0)
+%         shin_angles_in.signals.values(:,ii)=-shin_angles_in.signals.values(:,ii);
+%     end
+% end
+shin_angles_in.signals.values(:,[2 3]) = -shin_angles_in.signals.values(:,[2 3]); % flipping Y & Z angles
 
 % smoothing
 shin_angles_in.signals.values = smoothing(shin_angles_in.signals.values,pp);

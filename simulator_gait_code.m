@@ -29,10 +29,8 @@ pp=length(ankle.trans);
 ankle_angle_data = repmat(ankle.angles,step,1);
 ankle_angles_in.signals.values = ankle_angle_data(:,[1 3]);
 
-for ii=1:size(ankle_angles_in.signals.values,2)
-    if(mean(ankle_angles_in.signals.values(:,ii))<0)
-        ankle_angles_in.signals.values(:,ii)=-ankle_angles_in.signals.values(:,ii);
-    end
+if(mean(ankle_angles_in.signals.values(:,2))<0)
+    ankle_angles_in.signals.values(:,2)=-ankle_angles_in.signals.values(:,2);
 end
 % smoothing
 ankle_angles_in.signals.values = smoothing(ankle_angles_in.signals.values,pp);
@@ -68,18 +66,19 @@ ankle_trans_in.signals.values = curve_smooth(ankle_trans_in.signals.values);
 % Shin angles
 [r1,r2,r3]=quat2angle(shin.quat,'YZX'); % ML/DP/IE
 r123=[r3,r1,r2];
-r1 = abs(r1);
+% r1 = abs(r1);
 for ii=1:size(r123,2)
     if mean(r123(:,ii))>2
         r123(:,ii) = r123(:,ii)-pi;
     end
 end
 shin_angles_in.signals.values = repmat(r123,step,1); %DP/IE/ML
-for ii=1:size(shin_angles_in.signals.values,2)
-    if(mean(shin_angles_in.signals.values(:,ii))<0)
-        shin_angles_in.signals.values(:,ii)=-shin_angles_in.signals.values(:,ii);
-    end
-end
+% for ii=1:size(shin_angles_in.signals.values,2)
+%     if(mean(shin_angles_in.signals.values(:,ii))<0)
+%         shin_angles_in.signals.values(:,ii)=-shin_angles_in.signals.values(:,ii);
+%     end
+% end
+shin_angles_in.signals.values(:,[2 3]) = -shin_angles_in.signals.values(:,[2 3]); % flipping Y & Z angles
 
 % smoothing
 shin_angles_in.signals.values = smoothing(shin_angles_in.signals.values,pp);

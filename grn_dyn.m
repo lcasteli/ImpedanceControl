@@ -66,13 +66,14 @@ for ii = 1:13
     vec = [zz zzv];
     wght = repmat(70*9.81,[1 length(vec)]);
     
-    if ii<11
-    Zwght = repmat(35*9.81,[1 length(vec)]);
-    else
-    Zwght = repmat(70*9.81,[1 length(vec)]);
-    end
-    grn_dyn(ii,:) = wght/vec.';
-    grn_k(ii,:) = Zwght/zz.';
+%     if ii<11
+%     Zwght = repmat(35*9.81,[1 length(vec)]);
+%     else
+%     Zwght = repmat(70*9.81,[1 length(vec)]);
+%     end
+%     grn_dyn(ii,:) = wght/vec.';
+%     grn_k(ii,:) = Zwght/zz.';
+    
 %     % point is active if normal force is compressing ground
 %     loss = 1 ./ ( 1 + exp(-[0 0 1]*zz) );
 %     % loss = 1 ./ ( 1 + exp(150*[0 0 1]*rr) );
@@ -87,4 +88,7 @@ for ii = 1:13
 %         T = sum( repmat(loss,[3 1]) .* cross( R*r, FF ), 2 ); % contact torque on base frame
 %     %     F = sum(FF, 2 ); % contact force on base frame
 %     %     T = sum(cross( R*r, FF ), 2 ); % contact torque on base frame
+    
+%     norm(Tor())
+
 end

@@ -55,7 +55,6 @@ for ii = 1:length(Kdp)
     results.stiffness.errlm_ie(ii)= analysis.stiffness.PE_kie;
     results.stiffness.rsq_dp(ii) = analysis.stiffness.Rdp;
     results.stiffness.rsq_ie(ii) = analysis.stiffness.Rie;
-    
 %     results.damping.bdplm(ii)= analysis.damping.bdp;
 %     results.damping.bielm(ii)= analysis.damping.bie;
 %     results.damping.errlm_dp(ii)= analysis.damping.PE_bdp;

@@ -32,10 +32,8 @@ for kk=1:size(angles,3)
     ankle_angle_data = repmat(ankle.angles,steps,1);
     ankle_angle_data = ankle_angle_data(:,[1 3]);
 
-    for ii=1:size(ankle_angle_data,2)
-        if(mean(ankle_angle_data(:,ii))<0)
-            ankle_angle_data(:,ii)=-ankle_angle_data(:,ii);
-        end
+    if(mean(ankle_angle_data(:,2))<0)
+        ankle_angle_data(:,2)=-ankle_angle_data(:,2); % flipping Z angles
     end
     % smoothing
     ankle_angle_data = smoothing(ankle_angle_data,pp);
@@ -69,7 +67,7 @@ for kk=1:size(angles,3)
 
     % Shin angles
     [r1,r2,r3]=quat2angle(shin.quat,'YZX'); % ML/DP/IE
-    r1 = abs(r1);
+%     r1 = abs(r1);
     r123=[r3,r1,r2];
     for ii=1:size(r123,2)
         if mean(r123(:,ii))>2
@@ -78,11 +76,12 @@ for kk=1:size(angles,3)
     end
     shin_angle_data = repmat(r123,steps,1); %DP/IE/ML
     
-    for ii=1:size(shin_angle_data,2)
-        if(mean(shin_angle_data(:,ii))<0)
-            shin_angle_data(:,ii)=-shin_angle_data(:,ii);
-        end
-    end
+%     for ii=1:size(shin_angle_data,2)
+%         if(mean(shin_angle_data(:,ii))<0)
+%             shin_angle_data(:,ii)=-shin_angle_data(:,ii);
+%         end
+%     end
+    shin_angle_data(:,[2 3]) = -shin_angle_data(:,[2 3]); % flipping Y & Z angles
 
     % smoothing
     shin_angle_data = smoothing(shin_angle_data,pp);

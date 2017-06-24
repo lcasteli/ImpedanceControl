@@ -56,18 +56,19 @@ end
 % r123=[r3,abs(r1),r2];
 % % r1 = abs(r1);
 footq_angles = footq.angles;
-footq_angles(:,2) = abs(footq.angles(:,2));
+% footq_angles(:,2) = abs(footq.angles(:,2));
 for ii=1:size(footq.angles,2)
     if mean(footq.angles(:,ii))>2
         footq_angles(:,ii) = footq_angles(:,ii)-pi;
     end
 end
 footq_angles_in.signals.values = repmat(footq_angles,nstep,1); %DP/IE/ML
-for ii=1:size(footq_angles_in.signals.values,2)
-    if(mean(footq_angles_in.signals.values(:,ii))<0)
-        footq_angles_in.signals.values(:,ii)=-footq_angles_in.signals.values(:,ii);
-    end
-end
+% for ii=1:size(footq_angles_in.signals.values,2)
+%     if(mean(footq_angles_in.signals.values(:,ii))<0)
+%         footq_angles_in.signals.values(:,ii)=-footq_angles_in.signals.values(:,ii);
+%     end
+% end
+footq_angles_in.signals.values(:,[2 3]) = -footq_angles_in.signals.values(:,[2 3]); % flipping Y & Z angles
 
 % smoothing
 footq_angles_in.signals.values = smoothing(footq_angles_in.signals.values,pp);

@@ -23,11 +23,10 @@ pp=length(ankle.trans);
 ankle_angle_data = repmat(ankle.angles,nstep,1);
 ankle_angles_in.signals.values = ankle_angle_data(:,[1 3]);
 
-for ii=1:size(ankle_angles_in.signals.values,2)
-    if(mean(ankle_angles_in.signals.values(:,ii))<0)
-        ankle_angles_in.signals.values(:,ii)=-ankle_angles_in.signals.values(:,ii);
-    end
+if(mean(ankle_angles_in.signals.values(:,2))<0)
+    ankle_angles_in.signals.values(:,2)=-ankle_angles_in.signals.values(:,2);
 end
+
 % smoothing
 ankle_angles_in.signals.values = smoothing(ankle_angles_in.signals.values,pp);
 % ankle_angles_in.signals.values = arrayfun(@smooth,ankle_angles_in.signals.values);
@@ -85,18 +84,19 @@ end
 % r123=[r3,abs(r1),r2];
 % % r1 = abs(r1);
 shin_angles = shin.angles;
-shin_angles(:,2) = abs(shin.angles(:,2));
+% shin_angles(:,2) = abs(shin.angles(:,2));
 for ii=1:size(shin.angles,2)
     if mean(shin.angles(:,ii))>2
         shin_angles(:,ii) = shin_angles(:,ii)-pi;
     end
 end
-shin_angles_in.signals.values = repmat(shin_angles,nstep,1); %DP/IE/ML
-for ii=1:size(shin_angles_in.signals.values,2)
-    if(mean(shin_angles_in.signals.values(:,ii))<0)
-        shin_angles_in.signals.values(:,ii)=-shin_angles_in.signals.values(:,ii);
-    end
-end
+% shin_angles_in.signals.values = repmat(shin_angles,nstep,1); %DP/IE/ML
+% for ii=1:size(shin_angles_in.signals.values,2)
+%     if(mean(shin_angles_in.signals.values(:,ii))<0)
+%         shin_angles_in.signals.values(:,ii)=-shin_angles_in.signals.values(:,ii);
+%     end
+% end
+shin_angles_in.signals.values(:,[2 3]) = -shin_angles_in.signals.values(:,[2 3]); % flipping Y & Z angles
 
 % smoothing
 shin_angles_in.signals.values = smoothing(shin_angles_in.signals.values,pp);
@@ -107,18 +107,20 @@ shin_angles_in.signals.values = curve_smooth(shin_angles_in.signals.values);
 % fp_ie_in.signals.values = ;
 
 % Ankle Torque
-aa = find(abs(ankle.torque(:,3))>2,1);
-bb = find(abs(ankle.torque(:,3))>2,1,'last');
-ankle_torque = ankle.torque(aa:bb,:);
-ankle_torque = padarray(ankle_torque,[floor((400-length(ankle_torque))/2) 0]);
-ankle_torque = [ankle_torque;zeros(1,3)];
-% ankle_torque = resample(ankle_torque,length(ankle.torque),length(ankle_torque));
-ankle_torque_in.signals.values=repmat(ankle_torque,nstep,1);
+% aa = find(abs(ankle.torque(:,3))>2,1);
+% bb = find(abs(ankle.torque(:,3))>2,1,'last');
+% ankle_torque = ankle.torque(aa:bb,:);
+% ankle_torque = padarray(ankle_torque,[floor((400-length(ankle_torque))/2) 0]);
+% ankle_torque = [ankle_torque;zeros(1,3)];
+% % ankle_torque = resample(ankle_torque,length(ankle.torque),length(ankle_torque));
+% ankle_torque_in.signals.values=repmat(ankle_torque,nstep,1);
 
+ankle_torque_in.signals.values=repmat(ankle.torque,nstep,1);
 % smoothing
 % ankle_torque_in.signals.values = smoothing(ankle_torque_in.signals.values,pp);
 % ankle_torque_in.signals.values = curve_smooth(ankle_torque_in.signals.values);
 ankle_torque_in.signals.values = ankle_torque_in.signals.values(:,[1 3]);
+ankle_torque_in.signals.values(:,2) = -ankle_torque_in.signals.values(:,2);
 
 % time
 % ti = linspace(0,10,length(shin_angles_in.signals.values))';
@@ -136,15 +138,15 @@ ankle_acc_in.time = ti;
 
 ankle_torque_in.time = ti;
 
-ankle_trans_in.signals.values(:,2)=ankle_trans_in.signals.values(:,2)+0.1;
+% ankle_trans_in.signals.values(:,2)=ankle_trans_in.signals.values(:,2)+0.1;
 
 toc
 %% Gait Cycle
 % stiff_x=1e4;
 % stiff_dp=0.75*180/pi; stiff_ie=0.75*180/pi;
 % damp_dp=0.5*180/pi; damp_ie=0.5*180/pi;
-stiff_dp=10*180/pi; stiff_ie=10*180/pi;
-damp_dp=1*180/pi; damp_ie=1*180/pi;
+stiff_dp=122.21; stiff_ie=67.2766;
+damp_dp=1.4207; damp_ie=0.5552;
 sta=[-0.5345 0.03779 -0.0866]; %offset of prosthesis from centre of FP (XZY)
 
 % Solver as ode15s, ode23s, ode23t, ode23tb

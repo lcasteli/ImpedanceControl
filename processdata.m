@@ -11,7 +11,7 @@ function [shin, foot, ankle] = processdata(shinq,footq,ankleq)
     end
     rowssq = abs(r123s(1,2,:)) < 1; % Identify direction
     shin.angles = trimmean(r123s(:,:,rowssq), 10, 3);
-    shin.quat = angle2quat(shin.angles(:,1),shin.angles(:,2),shin.angles(:,3),'YZX');
+    shin.quat = angle2quat(shin.angles(:,1),shin.angles(:,2),shin.angles(:,3),'XYZ');
     
     % Shin Trans
     rowsst = shinq.trans(end,1,:)<0;
@@ -25,7 +25,7 @@ function [shin, foot, ankle] = processdata(shinq,footq,ankleq)
     end
     rowsfq = abs(r123f(1,2,:)) < 1; % Identify direction
     foot.angles = trimmean(r123f(:,:,rowsfq), 10, 3);
-    foot.quat = angle2quat(foot.angles(:,1),foot.angles(:,2),foot.angles(:,3),'YZX');
+    foot.quat = angle2quat(foot.angles(:,1),foot.angles(:,2),foot.angles(:,3),'XYZ');
     % Foot Trans
     rowsft = footq.trans(end,1,:)<0;
     foot.trans = trimmean(footq.trans(:,:,rowsft), 10, 3);
